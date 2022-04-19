@@ -464,7 +464,7 @@
 ; It is not heuristic admissible.
 (defun h1h(s)
   (cond ((not s) 0)
-	((isBox (car s)) (+ 1 (h1-helper (cdr s))))
+	((isBox (car s)) (+ 1 (h1-h (cdr s))))
 	(t (h1h (cdr s)) )
 	)
 )

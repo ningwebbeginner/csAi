@@ -190,7 +190,7 @@
 (defun existKeeper(s_list)
   (cond ((null s_list) nil)
 	((isKeeper (car s_list)) t)
-	(t(existBox (cdr s_list)))
+	(t(existKeeper (cdr s_list)))
   )
 )
 
@@ -213,13 +213,13 @@
 
 
 (setq p1 '((1 1 1 1 1 1)
-	   (1 0 3 0 0 1)
-	   (1 0 2 0 0 1)
-	   (1 1 0 1 1 1)
 	   (1 0 0 0 0 1)
-	   (1 0 4 0 4 1)
+	   (1 0 0 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 3 1)
+	   (1 0 5 0 4 1)
 	   (1 1 1 1 1 1)))
-	   
+
 ; Input: postion c d and direction
 ; Output: postion list of target '(c r), up or left would test margin.
 (defun getValue (s listp)

@@ -81,9 +81,9 @@
 (setq wall 1)
 (setq box 2)
 (setq keeper 3)
-(setq star 4)
-(setq boxstar 5)
-(setq keeperstar 6)
+(setq star 4);goal
+(setq boxstar 5);box+goal, a box on top of goal
+(setq keeperstar 6);keeper+goal, a keeper on top of goal
 
 ; Some helper functions for checking the content of a square
 (defun isBlank (v)
@@ -133,8 +133,16 @@
 ; 
 ; Assumes that the keeper is in row >= firstRow.
 ; The top row is the zeroth row.
-; The first (left) column is the zeroth column.
+; The first (right) column is the zeroth column.
 ;
+;(6)                                                                                                                                                                                                                   ;(setq p1 '((1 1 1 1 1 1)
+;           (1 0 3 0 0 1)
+;           (1 0 2 0 0 1)
+;           (1 1 0 1 1 1)
+;           (1 0 0 0 0 1)
+;           (1 0 4 0 4 1)
+;           (1 1 1 1 1 1))
+
 (defun getKeeperPosition (s row)
   (cond ((null s) nil)
 	(t (let ((x (getKeeperColumn (car s) 0)))
@@ -168,6 +176,26 @@
 	);end cond
   );end 
 
+
+;*********************added Helper Function:
+;to check if there is isBox return true
+(defun existBox(s_list)
+  (cond ((null s_list) nil)
+	((isBox (car s_list)) t)
+	(t(existBox (cdr s_list)))
+  )
+)
+
+;to check if there is isKeeper return true
+(defun existKeeper(s_list)
+  (cond ((null s_list) nil)
+	((isKeeper (car s_list)) t)
+	(t(existBox (cdr s_list)))
+  )
+)
+
+
+
 ; EXERCISE: Modify this function to return true (t)
 ; if and only if s is a goal state of the game.
 ; (neither any boxes nor the keeper is on a non-goal square)
@@ -177,9 +205,188 @@
 ; terminate until the whole search space is exhausted.
 ;
 (defun goal-test (s)
-  nil
-  );end defun
+  (cond ((null s) t)
+	((or (existBox (car s)) (existKeeper (car s)) ) nil)
+	(t(goal-test (cdr s)))
+  );end cond
+);end defun
 
+
+(setq p1 '((1 1 1 1 1 1)
+	   (1 0 3 0 0 1)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+	   
+; Input: postion c d and direction
+; Output: postion list of target '(c r), up or left would test margin.
+(defun getValue (s listp)
+    (cond ((not listp) nil)
+        (t (car (nthcdr (car listp)  (car (nthcdr (cadr listp) s)))))
+    )
+)
+
+; Input: postion c d and direction
+; Output: postion list of target '(c r), up or left would test margin.
+(defun getNextCR (c r dir)
+    (cond ((and (= dir 1) (> r 0)) (list c (- r 1)))
+        ((= dir 2) (list c (+ r 1)))
+        ((= dir 4) (list (+ c 1)  r))
+        ((and (= dir 3) (> c 0)) (list (- c 1)  r))
+        (t nil)
+    )
+)
+
+
+
+(defun setRow(s c v)
+  (cond ((null s) nil) 
+	((= 0 c) (cons v (cdr s)))
+	(t (cons (car s) (setRow (cdr s) (- c 1) v))))
+)
+
+; Input: postion c d and target v
+; Output: set target (c r)
+(defun setValuePost (s c r v)
+    (cond ((not s) nil)
+        ((= 0 r) (cons (setRow (car s) c v) (cdr s))) 
+	    (t (cons (car s) (setValuePost (cdr s) c (- r 1) v)))
+	    
+    
+    )
+)
+
+; move keeper or box to blank
+
+(defun move-to-blank (s c r listq)
+    (cond ((not s) nil)
+        (( not listq) nil)
+        ((not (getValue s (list c r))) nil)
+        ((isboxstar (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) box) c r star) )
+        ((iskeeperstar (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) keeper) c r star) )
+        ((isbox (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) (getValue s (list c r))) c r blank))
+        ((iskeeper (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) (getValue s (list c r))) c r blank))
+        (t nil)
+    )
+)
+
+(defun move-to-goal (s c r listq)
+    (cond ((not s) nil)
+        (( not listq) nil)
+        ((not (getValue s (list c r))) nil)
+        ((isboxstar (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) boxstar) c r star) )
+        ((iskeeperstar (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) keeperstar) c r star) )
+        ((isbox (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) boxstar) c r blank))
+        ((iskeeper (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) keeperstar) c r blank))
+        (t nil)
+    )
+)
+
+
+
+(defun move-to-box (s c r listq dir)
+    (cond ((not s) nil)
+        (( not listq) nil)
+        ((not (getValue s (getNextCR (car listq) (cadr listq) dir))) nil)
+        ((isstar (getValue s (getNextCR (car listq) (cadr listq) dir))) 
+            (move-to-blank (move-to-goal s (car listq) (cadr listq) (getNextCR (car listq) (cadr listq) dir)) c r listq) )
+        ((isblank (getValue s (getNextCR (car listq) (cadr listq) dir))) 
+            (move-to-blank (move-to-blank s (car listq) (cadr listq) (getNextCR (car listq) (cadr listq) dir)) c r listq) )
+        (t nil)
+    )
+)
+
+(defun move-to-boxstar (s c r listq dir)
+    (cond ((not s) nil)
+        (( not listq) nil)
+        ((not (getValue s (getNextCR (car listq) (cadr listq) dir))) nil)
+        ((isstar (getValue s (getNextCR (car listq) (cadr listq) dir))) 
+            (move-to-goal (move-to-goal s (car listq) (cadr listq) (getNextCR (car listq) (cadr listq) dir)) c r listq) )
+        ((isblank (getValue s (getNextCR (car listq) (cadr listq) dir))) 
+            (move-to-goal (move-to-blank s (car listq) (cadr listq) (getNextCR (car listq) (cadr listq) dir)) c r listq) )
+        (t nil)
+    )
+)
+; dir 1=UP,2=DOWN,3=LEFT,4=RIGHT
+(defun try-move (s c r dir)
+    (cond ((not (getValue s (getNextCR c r dir))) nil)
+        ((isBlank (getValue s (getNextCR c r dir))) (move-to-blank s c r (getNextCR c r dir)))
+        ((isStar (getValue s (getNextCR c r dir))) (move-to-goal s c r (getNextCR c r dir)))
+        ((isBox (getValue s (getNextCR c r dir))) 
+                (move-to-box s c r (getNextCR c r dir) dir))
+        ((isBoxStar (getValue s (getNextCR c r dir))) 
+                (move-to-boxstar s c r (getNextCR c r dir) dir))
+        (t nil)
+    
+    )
+)
+;self test
+(setq p1 '((1 1 1 1 1 1)
+	   (2 6 0 0 0 1)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 1 1 3))
+(setq p1 '((1 1 1 1 1 1)
+	   (5 6 0 0 0 1)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 1 1 3))
+(setq p1 '((1 1 1 1 1 1)
+	   (0 5 3 0 0 1)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 2 1 4))
+(setq p1 '((1 1 1 1 1 1)
+	   (1 0 6 2 0 1)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 2 1 4))
+(setq p1 '((1 1 1 1 1 1)
+	   (1 0 6 5 2 1)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 2 1 4))
+(setq p1 '((1 1 1 1 1 1)
+	   (1 0 6 2 2 1)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 2 1 4))
+(setq p1 '((1 1 1 1 1 1)
+	   (1 0 0 2 6 5)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 4 1 4))
+(setq p1 '((1 1 1 1 1 1)
+	   (1 0 3 2 0 3)
+	   (1 0 2 0 0 1)
+	   (1 1 0 1 1 1)
+	   (1 0 0 0 0 1)
+	   (1 0 4 0 4 1)
+	   (1 1 1 1 1 1)))
+;(print (try-move p1 5 1 4))
 ; EXERCISE: Modify this function to return the list of 
 ; sucessor states of s.
 ;
@@ -204,35 +411,119 @@
 	 (x (car pos))
 	 (y (cadr pos))
 	 ;x and y are now the coordinate of the keeper in s.
-	 (result nil)
+	 (result (list (try-move s x y 1) (try-move s x y 2) (try-move s x y 3) (try-move s x y 4)))
 	 )
     (cleanUpList result);end
    );end let
   );
 
+
+;test exsample
+(setq s1 '((1 1 1 1 1)
+ (1 4 0 0 1)
+ (1 0 2 0 1)
+ (1 0 3 0 1)
+ (1 0 0 0 1)
+ (1 1 1 1 1)
+ ))
+ (setq s2 '((1 1 1 1 1)
+ (1 0 0 4 1)
+ (1 0 2 3 1)
+ (1 0 0 0 1)
+ (1 0 0 4 1)
+ (1 1 1 1 1)
+ ))
+(setq s3 '((1 1 1 1 1)
+ (1 0 0 6 1)
+ (1 0 2 0 1)
+ (1 0 0 0 1)
+ (1 4 0 4 1)
+ (1 1 1 1 1)
+ ))
+ (setq s4 '((1 1 1 1 1)
+ (1 0 2 4 1)
+ (1 0 0 0 1)
+ (1 0 0 0 1)
+ (1 0 5 3 1)
+ (1 1 1 1 1)
+ ))
+;( print (next-states s4))
+
 ; EXERCISE: Modify this function to compute the trivial 
 ; admissible heuristic.
 ;
 (defun h0 (s)
+    0
   )
 
 ; EXERCISE: Modify this function to compute the 
 ; number of misplaced boxes in s.
 ;
-(defun h1 (s)
-  )
+; count the number of misplaced box on maze
+; iterations each position on the state
+; It is not heuristic admissible.
+(defun h1h(s)
+  (cond ((not s) 0)
+	((isBox (car s)) (+ 1 (h1-helper (cdr s))))
+	(t (h1h (cdr s)) )
+	)
+)
 
-; EXERCISE: Modify this h2 function to compute an
-; admissible heuristic value of s. 
+(defun h1 (s)
+  (cond ((not s) 0)
+	(t(+ (h1h (car s)) (h1 (cdr s)))))
+)
+
+; EXERCISE: Change the name of this function to h<UID> where
+; <UID> is your actual student ID number. Then, modify this 
+; function to compute an admissible heuristic value of s. 
 ; 
 ; This function will be entered in the competition.
 ; Objective: make A* solve problems as fast as possible.
 ; The Lisp 'time' function can be used to measure the 
 ; running time of a function call.
 ;
-(defun h2 (s)
-  )
+(defun h105788606 (s)
+    (let* ((keeperpos (getKeeperPosition s 0))
+	 )
+    (*(Totalcost Keeperpos (getBoxPosition s 0)) (h1 s))
+  ))
+  
 
+;Calculate distance between two points
+(defun dis (p1 p2)
+    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
+	
+)
+; Helper function of getBoxPosition
+;
+(defun getBoxColumn (r c currR)
+  (cond
+   ((null r) NIL)
+   ((isBox (car r)) (cons (list c currR) (getBoxColumn (cdr r) (+ c 1) currR)))
+   (t(getBoxColumn (cdr r) (+ c 1) currR))
+));end defun
+
+;
+; getBoxrPosition (s firstRow)
+; Returns a list indicating the position of the keeper (c r).
+; 
+; Assumes that the keeper is in row >= firstRow.
+; The top row is the zeroth row.
+; The first (right) column is the zeroth column.
+
+(defun getBoxPosition(s r)
+  (cond ((null s) NIL)
+	(t(append (getBoxColumn (car s) 0 r) (getBoxPosition (cdr s) (+ r 1))))
+	);end cond
+);end defun
+
+;get the sum of the total distanct from keeper to each box
+(defun Totalcost (keeperPos BoxPosList)
+  (cond ((null BoxPosList) 0)
+   (t (+ (dis keeperPos (car BoxPosList)) (Totalcost keeperPos (cdr BoxPosList))))
+));end totalCost
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #|
@@ -247,7 +538,6 @@
  | 
  |#
 ;(6)
-
 (setq p1 '((1 1 1 1 1 1)
 	   (1 0 3 0 0 1)
 	   (1 0 2 0 0 1)
@@ -257,7 +547,6 @@
 	   (1 1 1 1 1 1)))
 
 ;(15)
-
 (setq p2 '((1 1 1 1 1 1 1)
 	   (1 0 0 0 0 0 1) 
 	   (1 0 0 0 0 0 1) 
@@ -337,7 +626,7 @@
 
 ;(?)
 (setq p11 '((0 0 1 0 0 0 0)
-	    (0 2 1 4 0 4 0)
+	    (0 2 1 4 0  0)
 	    (0 2 0 4 0 0 0)	   
 	    (3 2 1 1 1 4 0)
 	    (0 0 1 4 0 0 0)))

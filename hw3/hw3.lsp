@@ -485,35 +485,21 @@
 	
 )
 
-
-;Calculate distance between two points
-(defun dis (p1 p2)
-    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
-	
-)
-
 ; 
 ; min-dist (src dests curr)
 ; Returns the smallest Distance from src coordinate (col, row)
 ; to any item in the list dests. 
 ;
-(defun min-dist (src dests curr)
-	(cond 
-		((null dests) curr)
-		(t
-			(let* (
-				(dist (dis src (car dests))))
-				(cond
-					((null curr) (min-dist src (cdr dests) dist))
-					(t (cond
-						((< dist curr) (min-dist src (cdr dests) dist))
-						(t (min-dist src (cdr dests) curr))
-					))
-				)
-			)
-		)
-	)
-)
+(defun min-dist (src dests)
+ (cond
+
+       ((null dests) nil)
+       ((null (cdr dests))               
+        (dis src (car dests)))
+       (t                                ; second is equal or smaller
+        (min (dis src (car dests))(min-dist src (cdr dests))))
+        ))
+        
 
 ; 
 ; sum-min-dist (srcs dests)
@@ -522,8 +508,9 @@
 ;
 (defun sum-min-dist (srcs dests)
 	(cond 
+		((null srcs) 0)
 		((null dests) 0)
-		(t (+ (min-dist (car srcs) dests NIL) (sum-min-dist (cdr srcs) (cdr dests))))
+		(t (+ (min-dist (first srcs) dests) (sum-min-dist (cdr srcs) dests)))
 	)
 )
 
@@ -552,7 +539,6 @@
 		(t (get-items-helper (cdr row) r (+ 1 c) item))
 	)
 )
-
 ; 
 ; get-items (s r item)
 ; Returns a list of the coordinates of every item found in s
@@ -563,7 +549,6 @@
 		(t (append (get-items-helper (car s) r 0 item) (get-items (cdr s) (+ r 1) item)))
 	)
 )
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

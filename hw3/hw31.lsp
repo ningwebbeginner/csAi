@@ -41,7 +41,7 @@
 ; I found this easier than typing (load "filename") every time. 
 ;
 (defun reload()
-  (load "hw3.lsp")
+  (load "hw31.lsp")
   )
 
 ;

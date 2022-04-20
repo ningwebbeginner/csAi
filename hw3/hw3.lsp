@@ -172,22 +172,14 @@
 
 
 
-;to check if there is isBox return true
-(defun existBox(s_list)
-  (cond ((null s_list) nil)
-	((isBox (car s_list)) t)
-	(t(existBox (cdr s_list)))
-  )
-)
+;to check if there is isBox or keeper return true
 
-;to check if there is isKeeper return true
-(defun existKeeper(s_list)
+(defun existBoxOrKeeper(s_list)
   (cond ((null s_list) nil)
-	((isKeeper (car s_list)) t)
-	(t(existKeeper (cdr s_list)))
-  )
+	((or (isKeeper (car s_list)) (isBox (car s_list))) t)
+	(t (existBoxOrKeeper (cdr s_list)))
+	)
 )
-
 
 
 ; EXERCISE: Modify this function to return true (t)
@@ -200,8 +192,8 @@
 ;
 (defun goal-test (s)
   (cond ((null s) t)
-	((or (existBox (car s)) (existKeeper (car s)) ) nil)
-	(t(goal-test (cdr s)))
+	((existBoxOrKeeper (car s)) nil)
+	(t (goal-test (cdr s)))
   );end cond
 );end defun
 

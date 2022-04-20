@@ -471,8 +471,8 @@
 ;
 (defun h2 (s)
     (let* (
-		(boxes (get-borg s 0 box))
-		(stars (get-borg s 0 star))
+		(boxes (get-items s 0 box))
+		(stars (get-items s 0 star))
 		(pos (getKeeperPosition s 0)))
 		(+ (sum-min-dist boxes stars) (sum-keeper-dist s pos boxes)) 
 	)

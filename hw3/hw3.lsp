@@ -135,13 +135,7 @@
 ; The top row is the zeroth row.
 ; The first (right) column is the zeroth column.
 ;
-;(6)                                                                                                                                                                                                                   ;(setq p1 '((1 1 1 1 1 1)
-;           (1 0 3 0 0 1)
-;           (1 0 2 0 0 1)
-;           (1 1 0 1 1 1)
-;           (1 0 0 0 0 1)
-;           (1 0 4 0 4 1)
-;           (1 1 1 1 1 1))
+
 
 (defun getKeeperPosition (s row)
   (cond ((null s) nil)
@@ -177,9 +171,9 @@
   );end 
 
 
-;*********************added Helper Function:
+
 ;to check if there is isBox return true
-(defun existBox (s_list)
+(defun existBox(s_list)
   (cond ((null s_list) nil)
 	((isBox (car s_list)) t)
 	(t(existBox (cdr s_list)))
@@ -187,7 +181,7 @@
 )
 
 ;to check if there is isKeeper return true
-(defun existKeeper (s_list)
+(defun existKeeper(s_list)
   (cond ((null s_list) nil)
 	((isKeeper (car s_list)) t)
 	(t(existKeeper (cdr s_list)))
@@ -212,13 +206,6 @@
 );end defun
 
 
-(setq p1 '((1 1 1 1 1 1)
-	   (1 0 0 0 0 1)
-	   (1 0 0 0 0 1)
-	   (1 1 0 1 1 1)
-	   (1 0 0 0 3 1)
-	   (1 0 5 0 4 1)
-	   (1 1 1 1 1 1)))
 
 ; Input: postion c d and direction
 ; Output: postion list of target '(c r), up or left would test margin.
@@ -241,7 +228,7 @@
 
 
 
-(defun setRow (s c v)
+(defun setRow(s c v)
   (cond ((null s) nil) 
 	((= 0 c) (cons v (cdr s)))
 	(t (cons (car s) (setRow (cdr s) (- c 1) v))))
@@ -474,16 +461,15 @@
 	(t(+ (h1h (car s)) (h1 (cdr s)))))
 )
 
-; EXERCISE: Change the name of this function to h<UID> where
-; <UID> is your actual student ID number. Then, modify this 
-; function to compute an admissible heuristic value of s. 
+; EXERCISE: Modify this h2 function to compute an
+; admissible heuristic value of s. 
 ; 
 ; This function will be entered in the competition.
 ; Objective: make A* solve problems as fast as possible.
 ; The Lisp 'time' function can be used to measure the 
 ; running time of a function call.
 ;
-(defun h105788606 (s)
+(defun h2 (s)
     (let* ((keeperpos (getKeeperPosition s 0))
 	 )
     (*(Totalcost Keeperpos (getBoxPosition s 0)) (h1 s))
@@ -512,7 +498,7 @@
 ; The top row is the zeroth row.
 ; The first (right) column is the zeroth column.
 
-(defun getBoxPosition (s r)
+(defun getBoxPosition(s r)
   (cond ((null s) NIL)
 	(t(append (getBoxColumn (car s) 0 r) (getBoxPosition (cdr s) (+ r 1))))
 	);end cond
@@ -523,7 +509,8 @@
   (cond ((null BoxPosList) 0)
    (t (+ (dis keeperPos (car BoxPosList)) (Totalcost keeperPos (cdr BoxPosList))))
 ));end totalCost
- 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #|

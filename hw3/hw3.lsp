@@ -238,16 +238,19 @@
 )
 
 ; move keeper or box to blank
-
 (defun move-to-blank (s c r listq)
     (cond ((not s) nil)
         (( not listq) nil)
-        ((not (getValue s (list c r))) nil)
-        ((isboxstar (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) box) c r star) )
-        ((iskeeperstar (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) keeper) c r star) )
-        ((isbox (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) (getValue s (list c r))) c r blank))
-        ((iskeeper (getValue s (list c r))) (setValuePost (setValuePost s (car listq) (cadr listq) (getValue s (list c r))) c r blank))
-        (t nil)
+        (t (let ((v (getValue s (list c r))))
+            (cond 
+                ((not v) nil)
+                ((isboxstar v) (setValuePost (setValuePost s (car listq) (cadr listq) box) c r star) )
+                ((iskeeperstar v) (setValuePost (setValuePost s (car listq) (cadr listq) keeper) c r star) )
+                ((isbox v) (setValuePost (setValuePost s (car listq) (cadr listq) (getValue s (list c r))) c r blank))
+                ((iskeeper v) (setValuePost (setValuePost s (car listq) (cadr listq) (getValue s (list c r))) c r blank))
+            )
+        ))
+        
     )
 )
 ; move keeper or box to goal

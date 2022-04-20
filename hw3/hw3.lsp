@@ -481,32 +481,24 @@
 (defun h2 (s)
     (let* ((Keeperpos (getKeeperPosition s 0))
         (boxpos (getBoxPosition s 0))
+        (starpos (getStarPosition s 0))
 	 )
-	 (cond ((not boxpos) (*(Totalcost Keeperpos (getStarPosition s 0)) (h1 s)))
-	    (t (*(Totalcost Keeperpos boxpos) (h1 s)))
+	 (cond ((not boxpos) (*(Totalcost Keeperpos starpos) (h1 s)))
+	    (t (*(TotalcostBS Keeperpos boxpos starpos) (h1 s)))
 	 )
     
  ))
-;Calculate distance between two points
-(defun dis (p1 p2)
-    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
-	
-)
+;get the sum of the totaldistanct from player to each star
+(defun Totalcost (keeperPos StarPosList)
+  (cond ((null StarPosList) 0)
+   (t (+ (dis keeperPos (car StarPosList)) (Totalcost keeperPos (cdr StarPosList))))
+));end totalCost
 
-
-
-
-;Calculate distance between two points
-(defun dis (p1 p2)
-    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
-	
-)
-
-
-;get the sum of the totaldistanct from player to each box
-(defun Totalcost (keeperPos BoxPosList)
+;get the sum of the totaldistanct from player to each box and star
+(defun TotalcostBS (keeperPos BoxPosList StarPosList)
   (cond ((null BoxPosList) 0)
-   (t (+ (dis keeperPos (car BoxPosList)) (Totalcost keeperPos (cdr BoxPosList))))
+    ((null StarPosList) 0)
+   (t (+ (+ (dis keeperPos (car BoxPosList)) (dis keeperPos (car StarPosList))) (Totalcost TotalcostBS (cdr BoxPosList) (cdr StarPosList))))
 ));end totalCost
 
 

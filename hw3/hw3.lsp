@@ -488,6 +488,12 @@
 	 )
     
  ))
+
+;Calculate distance between two points
+(defun dis (p1 p2)
+    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
+	
+)
 ;get the sum of the totaldistanct from player to each star
 (defun Totalcost (keeperPos StarPosList)
   (cond ((null StarPosList) 0)

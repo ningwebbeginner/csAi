@@ -486,11 +486,16 @@
 )
 
 
+;Calculate distance between two points
+(defun dis (p1 p2)
+    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
+	
+)
 
 ; 
-; min-dist (s dests curr)
-; Returns the smallest  Distance from src 
-; to any item in the list dest. 
+; min-dist (src dests curr)
+; Returns the smallest Distance from src coordinate (col, row)
+; to any item in the list dests. 
 ;
 (defun min-dist (src dests curr)
 	(cond 
@@ -512,8 +517,8 @@
 
 ; 
 ; sum-min-dist (srcs dests)
-; Returns the sum of the minimum distances 
-; between every item in srcs and each destination.
+; Returns the sum of the minimum distances from every item in srcs to a destination
+; in dests.
 ;
 (defun sum-min-dist (srcs dests)
 	(cond 
@@ -524,7 +529,7 @@
 
 ;
 ; sum-keeper-dist (s keeper dests)
-; Returns the sum of the distance between keeper and every destination
+; Returns the sum of the distance of keeper to every destination in dests
 ;
 (defun sum-keeper-dist (s keeper dests)
 	(cond
@@ -534,30 +539,31 @@
 )
 
 ; 
-; get-borg-helper (row r c des)
-; Helper function that gets the dest in a specified row and returns a 
-; list of the (c r) of each dest found in that row. 
+; get-items-helper (row r c item)
+; Helper function that gets the argument item in a specified row and returns a 
+; list of the coordinates of each item found in that row. 
 ;
-(defun get-borg-helper (row r c des)
+(defun get-items-helper (row r c item)
 	(cond 
 		((null row) NIL)
-		((= des (car row))
-			(cons (list c r) (get-borg-helper (cdr row) r (+ 1 c) des))
+		((= item (car row))
+			(cons (list c r) (get-items-helper (cdr row) r (+ 1 c) item))
 		)
-		(t (get-borg-helper (cdr row) r (+ 1 c) des))
+		(t (get-items-helper (cdr row) r (+ 1 c) item))
 	)
 )
 
 ; 
-; get-borg (s r item)
-; Returns a list of the (c r) of every dest found in s
+; get-items (s r item)
+; Returns a list of the coordinates of every item found in s
 ;
-(defun get-borg (s r des)
+(defun get-items (s r item)
 	(cond 
 		((null s) NIL)
-		(t (append (get-borg-helper (car s) r 0 des) (get-borg (cdr s) (+ r 1) des)))
+		(t (append (get-items-helper (car s) r 0 item) (get-items (cdr s) (+ r 1) item)))
 	)
 )
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

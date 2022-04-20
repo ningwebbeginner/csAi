@@ -499,7 +499,7 @@
   (cond ((null BoxPosList) 0)
     ((null StarPosList) 0)
    (t (+ (+ (dis keeperPos (car BoxPosList)) (dis keeperPos (car StarPosList))) 
-            (TotalcostBS (cdr BoxPosList) (cdr StarPosList))))
+            (TotalcostBS keeperPos (cdr BoxPosList) (cdr StarPosList))))
 ));end totalCost
 
 

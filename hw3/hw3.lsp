@@ -480,20 +480,6 @@
 ;
 (defun h2 (s)
     (let* ((Keeperpos (getKeeperPosition s 0))
-	 )
-    (*(Totalcost Keeperpos (getBoxPosition s 0)) (h1 s))
- ))
-
-
-
-;Calculate distance between two points
-(defun dis (p1 p2)
-    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
-	
-)
-
-(defun h2 (s)
-    (let* ((Keeperpos (getKeeperPosition s 0))
         (boxpos (getBoxPosition s 0))
 	 )
 	 (cond ((not boxpos) (*(Totalcost Keeperpos (getStarPosition s 0)) (h1 s)))
@@ -501,6 +487,13 @@
 	 )
     
  ))
+;Calculate distance between two points
+(defun dis (p1 p2)
+    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
+	
+)
+
+
 
 
 ;Calculate distance between two points

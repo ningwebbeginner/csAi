@@ -437,7 +437,7 @@
  (1 1 1 1 1)
  ))
  (setq s4 '((1 1 1 1 1)
- (1 0 2 4 1)
+ (1 0 0 4 1)
  (1 0 0 0 1)
  (1 0 0 0 1)
  (1 0 5 3 1)
@@ -479,15 +479,10 @@
 ; running time of a function call.
 ;
 (defun h2 (s)
-    (let* (
-		(boxes (get-items s 0 box))
-		(stars (get-items s 0 star))
-		(pos (getKeeperPosition s 0)))
-		(if (not boxes) (sum-keeper-dist s pos stars) 
-		    (+ (sum-min-dist boxes stars) (sum-keeper-dist s pos boxes))
-		) 
-	)
- )
+    (let* ((Keeperpos (getKeeperPosition s 0))
+	 )
+    (*(Totalcost Keeperpos (getBoxPosition s 0)) (h1 s))
+ ))
 
 
 
@@ -497,70 +492,44 @@
 	
 )
 
-; 
-; min-dist (src dests curr)
-; Returns the smallest Distance from src coordinate (col, row)
-; to any item in the list dests. 
-;
-(defun min-dist (src dests)
- (cond
+(defun h2(s)
+  (let* ((Keeperpos (getKeeperPosition s 0))
+	 );end let
+    (*(Totalcost Keeperpos (getBoxPosition s 0)) (h1 s))
+));end defun
 
-       ((null dests) nil)
-       ((null (cdr dests))               
-        (dis src (car dests)))
-       (t                                ; second is equal or smaller
-        (min (dis src (car dests))(min-dist src (cdr dests))))
-        ))
-        
 
-; 
-; sum-min-dist (srcs dests)
-; Returns the sum of the minimum distances from every item in srcs to a destination
-; in dests.
-;
-(defun sum-min-dist (srcs dests)
-	(cond 
-		((null srcs) 0)
-		((null dests) 0)
-		(t (+ (min-dist (first srcs) dests) (sum-min-dist (cdr srcs) dests)))
-	)
+;Calculate distance between two points
+(defun dis (p1 p2)
+    (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
+	
 )
 
-;
-; sum-keeper-dist (s keeper dests)
-; Returns the sum of the distance of keeper to every destination in dests
-;
-(defun sum-keeper-dist (s keeper dests)
-	(cond
-		((null dests) 0)
-		(t (+ (dis keeper (car dests)) (sum-keeper-dist s keeper (cdr dests))))
-	)
-)
 
-; 
-; get-items-helper (row r c item)
-; Helper function that gets the argument item in a specified row and returns a 
-; list of the coordinates of each item found in that row. 
-;
-(defun get-items-helper (row r c item)
-	(cond 
-		((null row) NIL)
-		((= item (car row))
-			(cons (list c r) (get-items-helper (cdr row) r (+ 1 c) item))
-		)
-		(t (get-items-helper (cdr row) r (+ 1 c) item))
-	)
-)
-; 
-; get-items (s r item)
-; Returns a list of the coordinates of every item found in s
-;
-(defun get-items (s r item)
-	(cond 
-		((null s) NIL)
-		(t (append (get-items-helper (car s) r 0 item) (get-items (cdr s) (+ r 1) item)))
-	)
-)
+;get the sum of the totaldistanct from player to each box
+(defun Totalcost (keeperPos BoxPosList)
+  (cond ((null BoxPosList) 0)
+   (t (+ (dis keeperPos (car BoxPosList)) (Totalcost keeperPos (cdr BoxPosList))))
+));end totalCost
+
+
+;A helper function to find box's position___________________________
+;I implemented this based on the given getKeeperPosition function
+(defun getBoxColumn (r c currR)
+  (cond
+   ((null r) NIL)
+   ((isBox (car r)) (cons (list c currR) (getBoxColumn (cdr r) (+ c 1) currR)))
+   (t(getBoxColumn (cdr r) (+ c 1) currR))
+));end defun
+
+
+;Get a list that contains all boxes' position 
+(defun getBoxPosition(s r)
+  (cond ((null s) NIL)
+	(t(append (getBoxColumn (car s) 0 r) (getBoxPosition (cdr s) (+ r 1))))
+	);end cond
+);end defun
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

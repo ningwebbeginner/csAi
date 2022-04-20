@@ -504,10 +504,17 @@
 (defun TotalcostBS (keeperPos BoxPosList StarPosList)
   (cond ((null BoxPosList) 0)
     ((null StarPosList) 0)
-   (t (+ (+ (dis keeperPos (car BoxPosList)) (dis keeperPos (car StarPosList))) 
+   (t (+ (+ (dis keeperPos (car BoxPosList)) (dis (car BoxPosList) (car StarPosList))) 
             (TotalcostBS keeperPos (cdr BoxPosList) (cdr StarPosList))))
 ));end totalCost
+; alter fucntion
 
+;(defun TotalcostBS (keeperPos BoxPosList StarPosList)
+;  (cond ((null BoxPosList) 0)
+;    ((null StarPosList) 0)
+;   (t (+ (+ (dis keeperPos (car BoxPosList)) (dis keeperPos (car StarPosList))) 
+;            (TotalcostBS keeperPos (cdr BoxPosList) (cdr StarPosList))))
+;));end totalCost
 
 ;A helper function to find box's position___________________________
 ;I implemented this based on the given getKeeperPosition function

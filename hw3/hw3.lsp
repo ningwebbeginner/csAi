@@ -474,10 +474,13 @@
 		(boxes (get-items s 0 box))
 		(stars (get-items s 0 star))
 		(pos (getKeeperPosition s 0)))
-		(+ (sum-min-dist boxes stars) (sum-keeper-dist s pos boxes)) 
+		(if (not boxes) (sum-keeper-dist s pos stars) 
+		    (+ (sum-min-dist boxes stars) (sum-keeper-dist s pos boxes))
+		) 
 	)
  )
-  
+
+
 
 ;Calculate distance between two points
 (defun dis (p1 p2)

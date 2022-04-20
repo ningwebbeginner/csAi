@@ -498,7 +498,8 @@
 (defun TotalcostBS (keeperPos BoxPosList StarPosList)
   (cond ((null BoxPosList) 0)
     ((null StarPosList) 0)
-   (t (+ (+ (dis keeperPos (car BoxPosList)) (dis keeperPos (car StarPosList))) (Totalcost TotalcostBS (cdr BoxPosList) (cdr StarPosList))))
+   (t (+ (+ (dis keeperPos (car BoxPosList)) (dis keeperPos (car StarPosList))) 
+            (TotalcostBS (cdr BoxPosList) (cdr StarPosList))))
 ));end totalCost
 
 

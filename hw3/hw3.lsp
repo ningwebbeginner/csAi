@@ -258,7 +258,7 @@
         (t nil)
     )
 )
-
+; move keeper or box to goal
 (defun move-to-goal (s c r listq)
     (cond ((not s) nil)
         (( not listq) nil)
@@ -272,7 +272,7 @@
 )
 
 
-
+; move keeper to box
 (defun move-to-box (s c r listq dir)
     (cond ((not s) nil)
         (( not listq) nil)
@@ -284,7 +284,7 @@
         (t nil)
     )
 )
-
+; move keeper to boxstar
 (defun move-to-boxstar (s c r listq dir)
     (cond ((not s) nil)
         (( not listq) nil)
@@ -470,10 +470,13 @@
 ; running time of a function call.
 ;
 (defun h2 (s)
-    (let* ((keeperpos (getKeeperPosition s 0))
-	 )
-    (*(Totalcost Keeperpos (getBoxPosition s 0)) (h1 s))
-  ))
+    (let* (
+		(boxes (get-borg s 0 box))
+		(stars (get-borg s 0 star))
+		(pos (getKeeperPosition s 0)))
+		(+ (sum-min-dist boxes stars) (sum-keeper-dist s pos boxes)) 
+	)
+ )
   
 
 ;Calculate distance between two points
@@ -481,34 +484,80 @@
     (+ (abs (- (car p1) (car p2))) (abs (- (cadr p1) (cadr p2))))
 	
 )
-; Helper function of getBoxPosition
-;
-(defun getBoxColumn (r c currR)
-  (cond
-   ((null r) NIL)
-   ((isBox (car r)) (cons (list c currR) (getBoxColumn (cdr r) (+ c 1) currR)))
-   (t(getBoxColumn (cdr r) (+ c 1) currR))
-));end defun
 
-;
-; getBoxrPosition (s firstRow)
-; Returns a list indicating the position of the keeper (c r).
+
+
 ; 
-; Assumes that the keeper is in row >= firstRow.
-; The top row is the zeroth row.
-; The first (right) column is the zeroth column.
+; min-dist (s dests curr)
+; Returns the smallest  Distance from src 
+; to any item in the list dest. 
+;
+(defun min-dist (src dests curr)
+	(cond 
+		((null dests) curr)
+		(t
+			(let* (
+				(dist (dis src (car dests))))
+				(cond
+					((null curr) (min-dist src (cdr dests) dist))
+					(t (cond
+						((< dist curr) (min-dist src (cdr dests) dist))
+						(t (min-dist src (cdr dests) curr))
+					))
+				)
+			)
+		)
+	)
+)
 
-(defun getBoxPosition(s r)
-  (cond ((null s) NIL)
-	(t(append (getBoxColumn (car s) 0 r) (getBoxPosition (cdr s) (+ r 1))))
-	);end cond
-);end defun
+; 
+; sum-min-dist (srcs dests)
+; Returns the sum of the minimum distances 
+; between every item in srcs and each destination.
+;
+(defun sum-min-dist (srcs dests)
+	(cond 
+		((null dests) 0)
+		(t (+ (min-dist (car srcs) dests NIL) (sum-min-dist (cdr srcs) (cdr dests))))
+	)
+)
 
-;get the sum of the total distanct from keeper to each box
-(defun Totalcost (keeperPos BoxPosList)
-  (cond ((null BoxPosList) 0)
-   (t (+ (dis keeperPos (car BoxPosList)) (Totalcost keeperPos (cdr BoxPosList))))
-));end totalCost
+;
+; sum-keeper-dist (s keeper dests)
+; Returns the sum of the distance between keeper and every destination
+;
+(defun sum-keeper-dist (s keeper dests)
+	(cond
+		((null dests) 0)
+		(t (+ (dis keeper (car dests)) (sum-keeper-dist s keeper (cdr dests))))
+	)
+)
+
+; 
+; get-borg-helper (row r c des)
+; Helper function that gets the dest in a specified row and returns a 
+; list of the (c r) of each dest found in that row. 
+;
+(defun get-borg-helper (row r c des)
+	(cond 
+		((null row) NIL)
+		((= des (car row))
+			(cons (list c r) (get-borg-helper (cdr row) r (+ 1 c) des))
+		)
+		(t (get-borg-helper (cdr row) r (+ 1 c) des))
+	)
+)
+
+; 
+; get-borg (s r item)
+; Returns a list of the (c r) of every dest found in s
+;
+(defun get-borg (s r des)
+	(cond 
+		((null s) NIL)
+		(t (append (get-borg-helper (car s) r 0 des) (get-borg (cdr s) (+ r 1) des)))
+	)
+)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

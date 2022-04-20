@@ -492,11 +492,15 @@
 	
 )
 
-(defun h2(s)
-  (let* ((Keeperpos (getKeeperPosition s 0))
-	 );end let
-    (*(Totalcost Keeperpos (getBoxPosition s 0)) (h1 s))
-));end defun
+(defun h2 (s)
+    (let* ((Keeperpos (getKeeperPosition s 0))
+        (boxpos (getBoxPosition s 0))
+	 )
+	 (cond ((not boxpos) (*(Totalcost Keeperpos (getStarPosition s 0)) (h1 s)))
+	    (t (*(Totalcost Keeperpos boxpos) (h1 s)))
+	 )
+    
+ ))
 
 
 ;Calculate distance between two points
@@ -529,7 +533,22 @@
 	(t(append (getBoxColumn (car s) 0 r) (getBoxPosition (cdr s) (+ r 1))))
 	);end cond
 );end defun
+;A helper function to find star's position___________________________
 
+(defun getStarColumn (r c currR)
+  (cond
+   ((null r) NIL)
+   ((isStar (car r)) (cons (list c currR) (getStarColumn (cdr r) (+ c 1) currR)))
+   (t(getStarColumn (cdr r) (+ c 1) currR))
+));end defun
+
+
+;Get a list that contains all boxes' position 
+(defun getStarPosition(s r)
+  (cond ((null s) NIL)
+	(t(append (getStarColumn (car s) 0 r) (getStarPosition (cdr s) (+ r 1))))
+	);end cond
+);end defun
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

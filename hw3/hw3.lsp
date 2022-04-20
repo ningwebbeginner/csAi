@@ -179,7 +179,7 @@
 
 ;*********************added Helper Function:
 ;to check if there is isBox return true
-(defun existBox(s_list)
+(defun existBox (s_list)
   (cond ((null s_list) nil)
 	((isBox (car s_list)) t)
 	(t(existBox (cdr s_list)))
@@ -187,7 +187,7 @@
 )
 
 ;to check if there is isKeeper return true
-(defun existKeeper(s_list)
+(defun existKeeper (s_list)
   (cond ((null s_list) nil)
 	((isKeeper (car s_list)) t)
 	(t(existKeeper (cdr s_list)))
@@ -241,7 +241,7 @@
 
 
 
-(defun setRow(s c v)
+(defun setRow (s c v)
   (cond ((null s) nil) 
 	((= 0 c) (cons v (cdr s)))
 	(t (cons (car s) (setRow (cdr s) (- c 1) v))))
@@ -462,9 +462,9 @@
 ; count the number of misplaced box on maze
 ; iterations each position on the state
 ; It is not heuristic admissible.
-(defun h1h(s)
+(defun h1h (s)
   (cond ((not s) 0)
-	((isBox (car s)) (+ 1 (h1-h (cdr s))))
+	((isBox (car s)) (+ 1 (h1h (cdr s))))
 	(t (h1h (cdr s)) )
 	)
 )
@@ -512,7 +512,7 @@
 ; The top row is the zeroth row.
 ; The first (right) column is the zeroth column.
 
-(defun getBoxPosition(s r)
+(defun getBoxPosition (s r)
   (cond ((null s) NIL)
 	(t(append (getBoxColumn (car s) 0 r) (getBoxPosition (cdr s) (+ r 1))))
 	);end cond

@@ -13,49 +13,56 @@
 
 )
 
-; backtrack searching delta
-(defun backtrack (n l delta)
-    (cond ((vaild l delta) (cond ((= (length l) n) l)
-                                    ((or (backTrack n (addLast l 1) clauses) 
-		                                (backTrack n (addLast l -1) clauses)))
-                                    
-                                ))
-    
-    )
 
-)
-;check the validity of clauses based on current mlist values
-(defun vaild (list clauselist)
-    (cond ((not clauselist) nil)
-            (t (and (deterClause list (car clauselist)) (helperFunc list (cdr clauselist))))
-    )
+;back track search recursivly
+;check wheter the clause is valid, if valid
+(defun backTrack (n l delta)
+  (cond ((vaild l delta) 
+	 (cond ((= (length l) n) l) 
+	       ((or (backTrack n (addLast l 1) delta) 
+		    (backTrack n (addLast l -1) delta)))
+	       ))))
+
+;check the validity of clauses based on current list values
+(defun vaild (l delta)
+  (cond ((not delta) t)
+	(t (and (deterClause l (car delta)) (vaild  l (cdr delta))))))
+
+;check the clause's validity with current mlist values
+(defun deterClause (l clause) 
+  (cond ((not clause) nil)
+	(t (cond ((deter l (car clause)) t)
+		 (t (deterClause l (cdr clause)))))
+))
+
+
+
+
+;if element in the current mlist equal to the element passed in
+;return true if not in the mlist
+(defun deter (l c)
+    (cond ((not l) t)
+	  ((= c (car l)) t)
+	  ((= (+ c (car l)) 0) nil)
+	  (t (deter (cdr l) c))
+	 
+	 )
+	  
 )
 
-(defun deterClause (list clause)
-    (cond ((not clause) nil)
-          (t (cond ((deter list (car clause)) t)
-                    (t (deterClause list (cdr clause)))
-          
-          ))
-    
-    )
-)
-(defun deter (list c)
-    (cond ((not list) t)
-          ((= (car list) c) t)
-          ((= (+ c (car list)) 0) nil)
-          (t (deter (cdr list) c))
-    )
-)
 
 ;add a value to model list
-(defun addLast (list value)
-    (cond ((> val 0) (append list (list (+ (length l) 1))))
-	  (t (append list (list (- 0 (+ (length l) 1)))))
+(defun addLast (l value)
+    (cond ((> value 0) (append l (list (+ (length l) 1))))
+	  (t (append l (list (- 0 (+ (length l) 1)))))
 	  )
 
 )
 
+
+
+	  
+	 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Functions that help you parse CNF from files in folder cnfs/

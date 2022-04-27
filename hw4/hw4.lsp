@@ -9,57 +9,49 @@
 ; param n: number of variables in delta
 ; param delta: a CNF represented as a list of lists
 (defun sat? (n delta)
-    (backtrack n '() delta)
+	(backtracksearch n delta '()))
 
-)
+;backtrackSearch carries out backtrack search to solve the satisifiablility problem.
+;Arguments: delta is a CNF represented as a list of lists, n is the number of variables in delta, and assignmentlist is the list of variables that have been assigned so far.
+;Solution: If the current set of assignments does not satisfy delta, return nil. If the set of assignments is length n (all variables have been assigned) and it satisfies delta, this is a solution, return it.
+;Otherwise add the next unassigned variable, and try backtrack search on both true and false possibilities for that variable.
+(defun backtrackSearch (n delta assignmentlist)
+    (cond ((not (evaluateCNF delta assignmentlist)) nil)
+        ((= (length assignmentlist) n) assignmentlist)
+        (t (or (backtrackSearch n delta (appendAssignment 0 assignmentlist)) (backtrackSearch n delta (appendAssignment  1 assignmentlist))))))
 
+;Helper function for backtrackSearch
+;Arguments: bool is whether the next variable to be assigned should be assigned true or false, and assignmentlist is the list of variables that have been assigned so far.
+;Assignments are appended in increasing order from 1 to n, so just append the next consecutive value to assignmentlist.
+(defun appendAssignment (bool assignmentlist)
+    (cond ((= bool 0) (append assignmentlist (list (- 0 (+ (length assignmentlist) 1)))))
+        (t (append assignmentlist (list (+ (length assignmentlist) 1))))))
 
-;back track search recursivly
-;check wheter the clause is valid, if valid
-(defun backTrack (n l delta)
-  (cond ((vaild l delta) 
-	 (cond ((= (length l) n) l) 
-	       ((or (backTrack n (addLast l 1) delta) 
-		    (backTrack n (addLast l -1) delta)))
-	       ))))
+;evaluateCNF checks if the current assignments satisfy the CNF.
+;Arguments: cnf is a CNF represented as a list of lists, and assignmentlist is the list of variables that have been assigned so far.
+;Call evaluateClause on each element of the cnf recursively, returning nil up the chain if any clause is not satisfied with the current set of assignments, and returning true if all clauses are satisfied.
+(defun evaluateCNF (cnf assignmentlist)
+    (cond ((null cnf) t)
+        ((not (evaluateClause (car cnf) assignmentlist)) nil)
+        (t (evaluateCNF (cdr cnf) assignmentlist))))
 
-;check the validity of clauses based on current list values
-(defun vaild (l delta)
-  (cond ((not delta) t)
-	(t (and (deterClause l (car delta)) (vaild  l (cdr delta))))))
+;evaluateClause checks if the current assignments satisfy a clause.
+;Arguments: clause is a clause represented as a list of integers, and assignmentlist is the list of variables assigned so far.
+;Call evaluateLiteral on each element of the clause recursively, returning t up the chain if any of the literals is satisfied with the current set of assignments, and returning nil if all literals are not satisfied.
+(defun evaluateClause (clause assignmentlist)
+    (cond ((null clause) nil)
+        ((evaluateLiteral (car clause) assignmentlist) t)
+        (t (evaluateClause (cdr clause) assignmentlist))))
 
-;check the clause's validity with current mlist values
-(defun deterClause (l clause) 
-  (cond ((not clause) nil)
-	(t (cond ((deter l (car clause)) t)
-		 (t (deterClause l (cdr clause)))))
-))
-
-
-
-
-;if element in the current mlist equal to the element passed in
-;return true if not in the mlist
-(defun deter (l c)
-    (cond ((not l) t)
-	  ((= c (car l)) t)
-	  ((= (+ c (car l)) 0) nil)
-	  (t (deter (cdr l) c))
-	 
-	 )
-	  
-)
-
-
-;add a value to model list
-(defun addLast (l value)
-    (cond ((> value 0) (append l (list (+ (length l) 1))))
-	  (t (append l (list (- 0 (+ (length l) 1)))))
-	  )
-
-)
-
-
+;evaluateLiteral checks if the current assignments satisfy a single literal.
+;Arguments: literal is an integer representing a literal of the CNF, and assignmentlist is the list of variables assigned so far.
+;Call evaluateLiteral on each element of assignmentlist recursively.
+;If there is an assignment that is equal to the literal, return true. If there is an assignment that is the negation of literal, return nil. If neither (the variable hasnt been assigned yet), return t.
+(defun evaluateLiteral (literal assignmentlist)
+    (cond ((null assignmentlist) t)
+        ((= literal (car assignmentlist)) t)
+        ((and (not (= literal (car assignmentlist))) (= (abs literal) (abs (car assignmentlist)))) nil)
+        (t (evaluateLiteral literal (cdr assignmentList)))))
 
 	  
 	 
